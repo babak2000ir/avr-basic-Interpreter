@@ -8,8 +8,10 @@
                 "/Zi",
                 "/EHsc",
                 "/nologo",
-                "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "${file}"
+                "/Fe${workspaceFolder}\\avrbasic-run.exe",
+                "${workspaceFolder}\\avrbasic-run.c",
+                "${workspaceFolder}\\avrbasic.c",
+                "${workspaceFolder}\\avrbasic-tokenizer.c"
             ],
             "options": {
                 "cwd": "${fileDirname}"
