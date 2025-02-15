@@ -3,9 +3,12 @@
         {
             "label": "Create bin",
             "type": "shell",
-            "command": "mkdir",
+            "command": "New-Item",
             "args": [
-                "\"${workspaceFolder}\\bin\"",
+                "${workspaceFolder}\\bin",
+                "-type",
+                "directory",
+                "-force"
             ],
             "problemMatcher": [],
             "group": {
@@ -17,9 +20,12 @@
         {
             "label": "Create obj",
             "type": "shell",
-            "command": "mkdir",
+            "command": "New-Item",
             "args": [
-                "\"${workspaceFolder}\\obj\""
+                "\"${workspaceFolder}\\obj\"",
+                "-type",
+                "directory",
+                "-force"
             ],
             "problemMatcher": [],
             "group": {

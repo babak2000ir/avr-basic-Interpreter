@@ -5,13 +5,13 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/avrbasic-run.exe",
+            "program": "${workspaceFolder}/bin/avrbasic-run.exe",
             "args": [
-                "${workspaceFolder}/sample.bas",
+                "${workspaceFolder}/bin/sample.bas",
                 "31"
             ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "externalTerminal"
         },
@@ -19,10 +19,10 @@
             "name": "C/C++: cl.exe build and debug active file",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "program": "${workspaceFolder}\\${fileBasenameNoExtension}.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "integratedTerminal",
             "preLaunchTask": "C/C++: cl.exe build active file"

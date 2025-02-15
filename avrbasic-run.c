@@ -48,6 +48,29 @@ int is_operator(char *token)
     return 0; // No match found
 }
 
+void printTable()
+{
+    printf("%-5s %-10s %-10s %-10s %-5s %-10s | %-10s %-10s %-10s %-10s\n",
+           "Line", "ReturnVal", "Command", "Param1", "Opr", "Param2",
+           "ExtCmd1", "ExtParam1", "ExtCmd2", "ExtParam2");
+    printf("--------------------------------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < programLineCount; i++)
+    {
+        printf("%-5d %-10s %-10s %-10s %-5s %-10s | %-10s %-10s %-10s %-10s\n",
+               program[i].lineNumber,
+               program[i].returnValue ? program[i].returnValue : "NULL",
+               program[i].command ? program[i].command : "NULL",
+               program[i].param1 ? program[i].param1 : "NULL",
+               program[i].opr ? program[i].opr : "NULL",
+               program[i].param2 ? program[i].param2 : "NULL",
+               program[i].extension.command1 ? program[i].extension.command1 : "NULL",
+               program[i].extension.param1 ? program[i].extension.param1 : "NULL",
+               program[i].extension.command2 ? program[i].extension.command2 : "NULL",
+               program[i].extension.param2 ? program[i].extension.param2 : "NULL");
+    }
+}
+
 void loadProgram(const char *filename)
 {
     FILE *file = fopen(filename, "r");
@@ -60,10 +83,11 @@ void loadProgram(const char *filename)
     char buffer[MAX_LINE_LEN];
     while (fgets(buffer, sizeof(buffer), file))
     {
-        fileLines[programLineCount++] = buffer;
+        fileLines[programLineCount++] = strdup(buffer);
     }
     fclose(file);
     tokenize();
+    printTable();
 }
 
 int main(int argc, char *argv[])

@@ -18,24 +18,26 @@ typedef enum
     TOKEN_OPERATOR
 } TokenType;
 
-typedef struct
+typedef struct ProgrammingLineExtensionTag
+{
+    char* command1;
+    char* param1;
+    char* command2;
+    char* param2;
+} Extension;
+
+typedef struct ProgramLineTag
 {
     int lineNumber;
-    char returnValue[MAX_TOKEN_LEN];
-    char command[MAX_TOKEN_LEN];
-    char param1[MAX_TOKEN_LEN];
-    char opr[MAX_TOKEN_LEN];
-    char param2[MAX_TOKEN_LEN];
-    struct
-    {
-        char command1[MAX_TOKEN_LEN];
-        char param1[MAX_TOKEN_LEN];
-        char command2[MAX_TOKEN_LEN];
-        char param2[MAX_TOKEN_LEN];
-    } extension;
+    char* returnValue;
+    char* command;
+    char* param1;
+    char* opr;
+    char* param2;
+    Extension extension;
 } ProgramLine;
 
-typedef struct
+typedef struct VariableTag
 {
     char name;
     int value;

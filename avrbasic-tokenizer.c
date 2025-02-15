@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "avrbasic-tokenizer.h"
 #include "avrbasic.h"
 
@@ -25,7 +27,7 @@ int get_j()
     return j; // Return the current value of j
 }
 
-void tokenizeLine(char *buffer)
+void tokenizeLine(char *buffer, ProgramLine *line)
 {
     int i = 0, tokenCounter = 0;
     char token[MAX_TOKEN_LEN];
@@ -56,19 +58,48 @@ void tokenizeLine(char *buffer)
             if (is_command(token))
             {
                 previousTokenType = TOKEN_COMMAND;
-                printf("Command %i: %s\n", tokenCounter, token);
+                // printf("Command %i: %s\n", tokenCounter, token);
+                if (line->command == NULL)
+                {
+                    line->command = strdup(token);
+                }
+                else if (line->extension.command1 == NULL)
+                {
+                    line->extension.command1 = strdup(token);
+                }
+                else
+                {
+                    line->extension.command2 = strdup(token);
+                }
             }
             else
             {
                 if (is_operator(token))
                 {
                     previousTokenType = TOKEN_OPERATOR;
-                    printf("Operator %i: %s\n", tokenCounter, token);
+                    //printf("Operator %i: %s\n", tokenCounter, token);
+                    line->opr = strdup(token);
                 }
                 else
                 {
                     previousTokenType = TOKEN_VARIABLE;
-                    printf("Variable %i: %s\n", tokenCounter, token);
+                    //printf("Variable %i: %s\n", tokenCounter, token);
+                    if (line->param1 == NULL)
+                    {
+                        line->param1 = strdup(token);
+                    }
+                    else if (line->param2 == NULL)
+                    {
+                        line->param2 = strdup(token);
+                    }
+                    else if (line->extension.param1 == NULL)
+                    {
+                        line->extension.param1 = strdup(token);
+                    }
+                    else
+                    {
+                        line->extension.param2 = strdup(token);
+                    }
                 }
             }
         }
@@ -88,13 +119,30 @@ void tokenizeLine(char *buffer)
             if (tokenCounter == 0)
             {
                 previousTokenType = TOKEN_LINE_NUMBER;
-                printf("Line Number: %s\n", token);
+                //printf("Line Number: %s\n", token);
+                line->lineNumber = atoi(token);
             }
             else
             {
                 tokenCounter++;
                 previousTokenType = TOKEN_VALUE;
-                printf("Value %i: %s\n", tokenCounter, token);
+                //printf("Value %i: %s\n", tokenCounter, token);
+                if (line->param1 == NULL)
+                {
+                    line->param1 = strdup(token);
+                }
+                else if (line->param2 == NULL)
+                {
+                    line->param2 = strdup(token);
+                }
+                else if (line->extension.param1 == NULL)
+                {
+                    line->extension.param1 = strdup(token);
+                }
+                else
+                {
+                    line->extension.param2 = strdup(token);
+                }
             }
         }
         // Operators (simple single-character)
@@ -102,7 +150,7 @@ void tokenizeLine(char *buffer)
         {
             while (ispunct(buffer[i]))
             {
-                int stop = strchr("=,^+", buffer[i]);
+                char* stop = strchr("=,^+", buffer[i]);
                 token[get_jpp()] = buffer[i++];
                 if (stop)
                 {
@@ -112,7 +160,8 @@ void tokenizeLine(char *buffer)
             token[get_j()] = '\0';
             tokenCounter++;
             previousTokenType = TOKEN_OPERATOR;
-            printf("Operator %i: %s\n", tokenCounter, token);
+            //printf("Operator %i: %s\n", tokenCounter, token);
+            line->opr = strdup(token);
         }
         // Unknown character
         else
@@ -130,6 +179,6 @@ void tokenize()
     for (tokenizerLineCounter = 0; tokenizerLineCounter < programLineCount; tokenizerLineCounter++)
     {
         strcpy(buffer, fileLines[tokenizerLineCounter]);
-        tokenizeLine(buffer);
+        tokenizeLine(buffer, &program[tokenizerLineCounter]);
     }
 }
