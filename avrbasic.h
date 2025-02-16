@@ -6,6 +6,7 @@
 #define MAX_LINE_LEN 100
 #define MAX_TOKENS 10
 #define MAX_TOKEN_LEN 6
+#define MAX_STACK_SIZE 100
 
 // Token Types Enum
 typedef enum
@@ -47,6 +48,15 @@ typedef struct VariableTag
     int value;
 } Variable;
 
+// Define a structure for the stack
+typedef struct StackTag 
+{
+    // Array to store stack elements
+    int arr[MAX_STACK_SIZE];  
+    // Index of the top element in the stack
+    int top;        
+} Stack;
+
 extern char *fileLines[MAX_PROGRAM_LINES];
 extern Variable variables[MAX_VARIABLES];
 extern ProgramLine program[MAX_PROGRAM_LINES];
@@ -61,5 +71,10 @@ extern const char *operators[16];
 extern void toUppercase(char str[]);
 extern int is_command(char *token);
 extern int is_operator(char *token);
+
+extern void initializeStack();
+extern void push(int value);
+extern int pop();
+extern int peek();
 
 #endif

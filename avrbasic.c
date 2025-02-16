@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include "avrbasic.h"
 
 char *fileLines[MAX_PROGRAM_LINES];
@@ -47,4 +48,46 @@ int is_operator(char *token)
         }
     }
     return 0; // No match found
+}
+
+Stack stack;
+
+// Function to initialize the stack
+void initializeStack() {
+    // Set top index to -1 to indicate an empty stack
+    stack.top = -1;  
+}
+
+// Function to push an element onto the stack
+void push(int value) {
+    // Check for stack overflow
+    if (stack.top == MAX_STACK_SIZE - 1) {
+        fprintf(stderr, "Stack Overflow\n");
+        return;
+    }
+    // Increment top and add the value to the top of the stack
+    stack.arr[++stack.top] = value;
+}
+
+// Function to pop an element from the stack
+int pop() {
+    // Check for stack underflow
+    if (stack.top == -1) {
+        return 0;
+    }
+    // Return the top element 
+    int popped = stack.arr[stack.top];
+    // decrement top pointer
+    stack.top--;
+    // return the popped element
+    return popped;
+}
+
+int peek() {
+    // Check for stack underflow
+    if (stack.top == -1) {
+        return 0;
+    }
+    // Return the top element
+    return stack.arr[stack.top];
 }

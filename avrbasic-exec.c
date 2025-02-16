@@ -64,6 +64,10 @@ int programLineCounter = 0;
 
 int gotoLine(char *param, TokenType paramType)
 {
+    if (param == NULL)
+    {
+        return programLineCounter;
+    }
     int lineNo;
     if (paramType == TOKEN_VARIABLE)
     {
@@ -73,7 +77,24 @@ int gotoLine(char *param, TokenType paramType)
     {
         lineNo = atoi(param);
     }
-    return findProgramLine(lineNo) - 1;
+    return findProgramLine(lineNo);
+}
+
+int gotoAfterBalancedNEXT()
+{
+    int balance = 0;
+    for (int i = programLineCounter; i < programLineCount; i++)
+    {
+        if (strcmp(program[i].command, "FOR") == 0)
+            balance++;
+        if (strcmp(program[i].command, "NEXT") == 0)
+            if (balance == 1)
+                return i + 1;
+            else
+                balance--;
+    }
+    fprintf(stderr, "Error: NEXT not found\n");
+    return 0;
 }
 
 int getParamValue(char *param, TokenType paramType)
@@ -90,10 +111,53 @@ int getParamValue(char *param, TokenType paramType)
 
 void executeProgram()
 {
+    initializeStack();
+
     while (programLineCounter < programLineCount)
     {
         ProgramLine line = program[programLineCounter];
-        if (strcmp(line.command, "END") == 0)
+
+        // If Commande is null, we process based on opr
+        if (line.command == NULL)
+        {
+            if (strcmp(line.opr, "+") == 0)
+            {
+                setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) + getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "-") == 0)
+            {
+                setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) - getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "/") == 0)
+            {
+                setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) / getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "*") == 0)
+            {
+                setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) * getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "MOD") == 0)
+            {
+                setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) % getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "AND") == 0)
+            {
+                setVariable(line.param1, getVariableValue(line.param1) & getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "OR") == 0)
+            {
+                setVariable(line.param1, getVariableValue(line.param1) | getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "XOR") == 0)
+            {
+                setVariable(line.param1, getVariableValue(line.param1) ^ getParamValue(line.param2, line.param2Type));
+            }
+            else if (strcmp(line.opr, "^") == 0)
+            {
+                setVariable(line.param1, pow(getParamValue(line.param1, line.param1Type), getParamValue(line.param2, line.param2Type)));
+            }
+        }
+        else if (strcmp(line.command, "END") == 0)
         {
             printf("Program ended\n");
             return;
@@ -106,9 +170,32 @@ void executeProgram()
                 variables[j].value = 0;
             }
         }
-        else if (strcmp(line.command, "FOR") == 0) // Deploy
+        else if (strcmp(line.command, "FOR") == 0)
         {
-            printf("Next line\n");
+            if (line.lineNumber == peek())
+            {
+                setVariable(line.param1, getVariableValue(line.param1) + 1);
+            }
+            else
+            {
+                push(line.lineNumber);
+                // initialize the For variable to param2 only if it's first time
+                setVariable(line.param1, atoi(line.param2));
+            }
+
+            // if param1 > extension.param1 then go to NEXT line
+            if (getVariableValue(line.param1) > getParamValue(line.extension.param1, line.extension.param1Type))
+            {
+                pop();
+                programLineCounter = gotoAfterBalancedNEXT();
+                continue;
+            }
+        }
+        else if (strcmp(line.command, "NEXT") == 0) // Deploy
+        {
+            programLineCounter = findProgramLine(peek());
+            continue;
+            ;
         }
         else if (strcmp(line.command, "WHILE") == 0) // Deploy
         {
@@ -121,6 +208,7 @@ void executeProgram()
         else if (strcmp(line.command, "GOTO") == 0)
         {
             programLineCounter = gotoLine(line.param1, line.param1Type);
+            continue;
         }
         else if (strcmp(line.command, "WEND") == 0)
         {
@@ -169,10 +257,6 @@ void executeProgram()
         else if (strcmp(line.command, "POKE") == 0) // Deploy
         {
             printf("Poke line\n");
-        }
-        else if (strcmp(line.command, "NEXT") == 0) // Deploy
-        {
-            printf("For line\n");
         }
         else if (strcmp(line.command, "IF") == 0)
         {
@@ -254,7 +338,7 @@ void executeProgram()
         {
             printf("Peek line\n");
         }
-        else if (strcmp(line.command, "ABS") == 0) 
+        else if (strcmp(line.command, "ABS") == 0)
         {
             setVariable(line.returnValue, abs(getParamValue(line.param1, line.param1Type)));
         }
@@ -311,11 +395,11 @@ void executeProgram()
         }
         else if (strcmp(line.command, "SHL") == 0)
         {
-            setVariable(line.returnValue, getParamValue(line.param1, line.param1Type)<<getParamValue(line.param2, line.param2Type));
+            setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) << getParamValue(line.param2, line.param2Type));
         }
         else if (strcmp(line.command, "SHR") == 0)
         {
-            setVariable(line.returnValue, getParamValue(line.param1, line.param1Type)>>getParamValue(line.param2, line.param2Type));
+            setVariable(line.returnValue, getParamValue(line.param1, line.param1Type) >> getParamValue(line.param2, line.param2Type));
         }
         else if (strcmp(line.command, "TO") == 0) // Deploy
         {
