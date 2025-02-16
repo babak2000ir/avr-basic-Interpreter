@@ -84,7 +84,11 @@ void tokenizeLine(char *buffer, ProgramLine *line)
                 {
                     previousTokenType = TOKEN_VARIABLE;
                     //printf("Variable %i: %s\n", tokenCounter, token);
-                    if (line->param1 == NULL)
+                    if (tokenCounter == 1) 
+                    {
+                        line->returnValue = strdup(token);
+                    } 
+                    else if (line->param1 == NULL)
                     {
                         line->param1 = strdup(token);
                     }
