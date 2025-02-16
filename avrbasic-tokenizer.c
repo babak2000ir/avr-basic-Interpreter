@@ -91,18 +91,22 @@ void tokenizeLine(char *buffer, ProgramLine *line)
                     else if (line->param1 == NULL)
                     {
                         line->param1 = strdup(token);
+                        line->param1Type = TOKEN_VARIABLE;
                     }
                     else if (line->param2 == NULL)
                     {
                         line->param2 = strdup(token);
+                        line->param2Type = TOKEN_VARIABLE;
                     }
                     else if (line->extension.param1 == NULL)
                     {
                         line->extension.param1 = strdup(token);
+                        line->extension.param1Type = TOKEN_VARIABLE;
                     }
                     else
                     {
                         line->extension.param2 = strdup(token);
+                        line->extension.param2Type = TOKEN_VARIABLE;
                     }
                 }
             }
@@ -134,18 +138,22 @@ void tokenizeLine(char *buffer, ProgramLine *line)
                 if (line->param1 == NULL)
                 {
                     line->param1 = strdup(token);
+                    line->param1Type = TOKEN_VALUE;
                 }
                 else if (line->param2 == NULL)
                 {
                     line->param2 = strdup(token);
+                    line->param2Type = TOKEN_VALUE;
                 }
                 else if (line->extension.param1 == NULL)
                 {
                     line->extension.param1 = strdup(token);
+                    line->extension.param1Type = TOKEN_VALUE;
                 }
                 else
                 {
                     line->extension.param2 = strdup(token);
+                    line->extension.param2Type = TOKEN_VALUE;
                 }
             }
         }

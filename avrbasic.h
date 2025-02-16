@@ -20,33 +20,46 @@ typedef enum
 
 typedef struct ProgrammingLineExtensionTag
 {
-    char* command1;
-    char* param1;
-    char* command2;
-    char* param2;
+    char *command1;
+    char *param1;
+    TokenType param1Type;
+    char *command2;
+    char *param2;
+    TokenType param2Type;
 } Extension;
 
 typedef struct ProgramLineTag
 {
     int lineNumber;
-    char* returnValue;
-    char* command;
-    char* param1;
-    char* opr;
-    char* param2;
+    char *returnValue;
+    char *command;
+    char *param1;
+    TokenType param1Type;
+    char *opr;
+    char *param2;
+    TokenType param2Type;
     Extension extension;
 } ProgramLine;
 
 typedef struct VariableTag
 {
-    char name;
+    char* name;
     int value;
 } Variable;
 
-extern char* fileLines[MAX_PROGRAM_LINES];
+extern char *fileLines[MAX_PROGRAM_LINES];
 extern Variable variables[MAX_VARIABLES];
 extern ProgramLine program[MAX_PROGRAM_LINES];
 extern int variableCount;
 extern int programLineCount;
+
+// Lists of reserved words
+extern const char *commands[32];
+extern const char *operators[16];
+
+// Functions to check if the token is a reserved word
+extern void toUppercase(char str[]);
+extern int is_command(char *token);
+extern int is_operator(char *token);
 
 #endif
