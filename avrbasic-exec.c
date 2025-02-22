@@ -111,7 +111,16 @@ int getParamValue(char *param, TokenType paramType)
 
 void executeProgram()
 {
-    initializeStack();
+    //printf program to output
+    for (int i = 0; i < programLineCount; i++)
+    {
+        //print fileLines
+        printf("%s", fileLines[i]);
+        printf("%d %s %s %s %s %s\n", program[i].lineNumber, program[i].command, program[i].paramArray[0].param, program[i].paramArray[1].param, program[i].paramArray[2].param, program[i].paramArray[3].param);
+        printf("\n");
+    }
+
+    //initializeStack();
 
     /* while (programLineCounter < programLineCount)
     {

@@ -7,6 +7,7 @@
 #define MAX_TOKENS 10
 #define MAX_TOKEN_LEN 6
 #define MAX_STACK_SIZE 100
+#define MAX_PARAM_LEN 100
 
 // Token Types Enum
 typedef enum
@@ -22,30 +23,30 @@ typedef enum
 
 typedef struct ParamTag
 {
-    char param[MAX_TOKEN_LEN+1];
+    char param[MAX_PARAM_LEN + 1];
     TokenType paramType;
 } Param;
 
 typedef struct ProgramLineTag
 {
     int lineNumber;
-    char command[MAX_TOKEN_LEN+1];
-    Param* paramArray;
+    char command[MAX_TOKEN_LEN + 1];
+    Param *paramArray;
 } ProgramLine;
 
 typedef struct VariableTag
 {
-    char name[MAX_TOKEN_LEN+1];
+    char name[MAX_TOKEN_LEN + 1];
     int value;
 } Variable;
 
 // Define a structure for the stack
-typedef struct StackTag 
+typedef struct StackTag
 {
     // Array to store stack elements
-    int arr[MAX_STACK_SIZE];  
+    int arr[MAX_STACK_SIZE];
     // Index of the top element in the stack
-    int top;        
+    int top;
 } Stack;
 
 extern char *fileLines[MAX_PROGRAM_LINES];
@@ -61,6 +62,7 @@ extern const char *operators[];
 // Functions to check if the token is a reserved word
 extern void toUppercase(char str[]);
 extern int is_command(char *token);
+extern int is_lineStop(char *lastChar, int lastCharIndex);
 extern int is_operator(char *token);
 
 extern void initializeStack();

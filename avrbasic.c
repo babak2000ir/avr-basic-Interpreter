@@ -37,11 +37,18 @@ int is_command(char *token)
     return 0; // No match found
 }
 
-int is_lineStop(char lastChar)
+int is_lineStop(char* lastChar, int lastCharIndex)
 {
-    if (lastChar == ',' || lastChar == '=' || lastChar == '\n' || lastChar == '\0')
+    if (lastChar[lastCharIndex] == ',' || lastChar[lastCharIndex] == '\n' || lastChar[lastCharIndex] == '\0')
     {
         return 1;
+    } 
+    else if (lastChar[lastCharIndex] == '=')
+    {
+        if (lastCharIndex == 0 || (lastChar[lastCharIndex-1] != '>' && lastChar[lastCharIndex-1] != '<'))
+        {
+            return 1;
+        }
     }
     return 0;
 }

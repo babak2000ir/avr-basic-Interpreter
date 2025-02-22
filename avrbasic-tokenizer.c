@@ -6,7 +6,7 @@
 
 int tokenizerLineCounter = 0;
 
-void addCommandToLine(ProgramLine* line, char *command)
+void addCommandToLine(ProgramLine *line, char *command)
 {
     if (line->command[0] == '\0')
     {
@@ -19,23 +19,43 @@ void addCommandToLine(ProgramLine* line, char *command)
     }
 }
 
-void addParamToLine(ProgramLine* line, char *param, int paramCounter)
+void addParamToLine(ProgramLine *line, char *param, int paramCounter)
 {
-    line->paramArray = (Param*)realloc(line->paramArray, sizeof(Param) * (paramCounter + 1));
+    line->paramArray = (Param *)realloc(line->paramArray, sizeof(Param) * (paramCounter + 1));
     strcpy(line->paramArray[paramCounter].param, param);
     line->paramArray[paramCounter].paramType = TOKEN_EXPRESSION;
 }
 
-void tokenizeLine(char *buffer, ProgramLine* line)
+typedef struct TokenTag
+{
+    char token[MAX_PARAM_LEN];
+    int tokenCharacterCounter;
+} Token;
+
+void resetToken(Token *token)
+{
+    token->tokenCharacterCounter = 0;
+    token->token[0] = '\0';
+}
+
+void addCharToToken(Token *token, char c)
+{
+    token->token[token->tokenCharacterCounter++] = c;
+    token->token[token->tokenCharacterCounter] = '\0';
+}
+
+void tokenizeLine(char *buffer, ProgramLine *line)
 {
     int characterCounter = 0;
-    int tokenCharacterCounter = 0;
-    int solidTokenCharacterCounter = 0;
     int tokenCounter = 0;
     int paramCounter = 0;
 
-    char token[100];
-    char solidToken[100];
+    Token token = {
+        .tokenCharacterCounter = 0,
+    };
+    Token solidToken = {
+        .tokenCharacterCounter = 0,
+    };
 
     // handle line no
     if (!(buffer[0]))
@@ -45,70 +65,69 @@ void tokenizeLine(char *buffer, ProgramLine* line)
     }
     while (isalnum(buffer[characterCounter]))
     {
-        token[characterCounter] = buffer[characterCounter++];
+        addCharToToken(&token, buffer[characterCounter++]);
     }
-    token[characterCounter++] = '\0';
-    line->lineNumber = atoi(token);
-
-
-    //convert solid "AND", "OR", "XOR", "MOD" to &, |, @, £
-
+    
+    line->lineNumber = atoi(token.token);
+    resetToken(&token);
 
     // handle rest
-    do 
+    do
     {
         //, = \n \0 stop
-        if (is_lineStop(buffer[characterCounter])) //|| strlen(token) >= MAX_TOKEN_LEN
+        if (is_lineStop(buffer, characterCounter)) //|| strlen(token) >= MAX_TOKEN_LEN
         {
             // Check Token if it's a command
-            if (is_command(token))
+            if (is_command(token.token))
             {
-                addCommandToLine(line, token);
+                addCommandToLine(line, token.token);
             }
             else
             {
                 // it's an expression, save as a param in paramArray
-                addParamToLine(line, token, paramCounter++);
+                addParamToLine(line, token.token, paramCounter++);
             }
 
-            tokenCharacterCounter = 0;
-            solidTokenCharacterCounter = 0;
-            token[0] = '\0';
-            solidToken[0] = '\0';
+            resetToken(&token);
+            resetToken(&solidToken);
         }
         else if (isspace(buffer[characterCounter]))
         {
             // space -> Check stop/continue
-            if (is_command(token) && tokenCharacterCounter != 0)
+            if (is_command(token.token) && token.tokenCharacterCounter != 0)
             {
-                addCommandToLine(line, token);
-                tokenCharacterCounter = 0;
-                token[0] = '\0';
+                addCommandToLine(line, token.token);
+                resetToken(&token);
             }
-            else if (is_command(solidToken) && solidTokenCharacterCounter != 0)
+            else if (is_command(solidToken.token))
             {
-                addCommandToLine(line, solidToken);
-                token[tokenCharacterCounter - solidTokenCharacterCounter] = '\0'; 
-                addParamToLine(line, token, paramCounter++);
-                tokenCharacterCounter = 0;
-                token[0] = '\0';
+                addCommandToLine(line, solidToken.token);
+                token.token[token.tokenCharacterCounter - solidToken.tokenCharacterCounter] = '\0';
+                addParamToLine(line, token.token, paramCounter++);
+                resetToken(&token);
+            }
+            else
+            {
+                if (token.tokenCharacterCounter != 0)
+                {
+                    addCharToToken(&token, buffer[characterCounter]);
+                }
             }
 
-            solidTokenCharacterCounter = 0;
-            solidToken[0] = '\0';
+            resetToken(&solidToken);
         }
         else
         {
-            token[tokenCharacterCounter] = buffer[characterCounter];
-            token[tokenCharacterCounter + 1] = '\0';
-            solidToken[solidTokenCharacterCounter] = buffer[characterCounter];
-            solidToken[solidTokenCharacterCounter + 1] = '\0';
-
-            tokenCharacterCounter++;
-            solidTokenCharacterCounter++;
+            addCharToToken(&token, buffer[characterCounter]);
+            addCharToToken(&solidToken, buffer[characterCounter]);
         }
         characterCounter++;
     } while (buffer[characterCounter] != '\0');
+
+    if (token.tokenCharacterCounter  > 0)
+    {
+        addParamToLine(line, token.token, paramCounter++);
+    }
 }
 
 void tokenize()
