@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.compilerPath": "cl.exe",
     "files.associations": {
-        "math.h": "c"
+        "math.h": "c",
+        "avrbasic.h": "c"
     }
 }

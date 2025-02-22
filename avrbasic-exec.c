@@ -26,7 +26,7 @@ void setVariable(char *name, int value)
     {
         if (variableCount < MAX_VARIABLES)
         {
-            variables[variableCount].name = name;
+            strcpy(variables[variableCount].name, name);
             variables[variableCount].value = value;
             variableCount++;
         }
@@ -113,7 +113,7 @@ void executeProgram()
 {
     initializeStack();
 
-    while (programLineCounter < programLineCount)
+    /* while (programLineCounter < programLineCount)
     {
         ProgramLine line = program[programLineCounter];
 
@@ -420,5 +420,5 @@ void executeProgram()
         }
 
         programLineCounter++;
-    }
+    } */
 }

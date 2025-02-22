@@ -5,184 +5,110 @@
 #include "avrbasic.h"
 
 int tokenizerLineCounter = 0;
-int j = 0; // Global variable j
-int init_j()
+
+void addCommandToLine(ProgramLine* line, char *command)
 {
-    j = 0; // Initialize j
-    return j;
-}
-int get_jpp()
-{
-    int prev = j; // Store the previous value
-    if (j == MAX_TOKEN_LEN - 1)
+    if (line->command[0] == '\0')
     {
-        fprintf(stderr, "Error: A token on line %d exceeded MAX_TOKEN_LEN of %d\n", tokenizerLineCounter + 1, MAX_TOKEN_LEN - 1);
+        strcpy(line->command, command);
+    }
+    else
+    {
+        char extCommand[2] = {command[0] + '\0'};
+        strcat(line->command, extCommand);
+    }
+}
+
+void addParamToLine(ProgramLine* line, char *param, int paramCounter)
+{
+    line->paramArray = (Param*)realloc(line->paramArray, sizeof(Param) * (paramCounter + 1));
+    strcpy(line->paramArray[paramCounter].param, param);
+    line->paramArray[paramCounter].paramType = TOKEN_EXPRESSION;
+}
+
+void tokenizeLine(char *buffer, ProgramLine* line)
+{
+    int characterCounter = 0;
+    int tokenCharacterCounter = 0;
+    int solidTokenCharacterCounter = 0;
+    int tokenCounter = 0;
+    int paramCounter = 0;
+
+    char token[100];
+    char solidToken[100];
+
+    // handle line no
+    if (!(buffer[0]))
+    {
+        fprintf(stderr, "Error: Invalid line number \n");
         exit(1);
     }
-    j++; // Increment j
-    return prev;
-}
-int get_j()
-{
-    return j; // Return the current value of j
-}
-
-void tokenizeLine(char *buffer, ProgramLine *line)
-{
-    int i = 0, tokenCounter = 0;
-    char token[MAX_TOKEN_LEN];
-    TokenType previousTokenType = TOKEN_UNKNOWN;
-
-    while (buffer[i] != '\0')
+    while (isalnum(buffer[characterCounter]))
     {
-        if (isspace(buffer[i]))
+        token[characterCounter] = buffer[characterCounter++];
+    }
+    token[characterCounter++] = '\0';
+    line->lineNumber = atoi(token);
+
+
+    //convert solid "AND", "OR", "XOR", "MOD" to &, |, @, £
+
+
+    // handle rest
+    do 
+    {
+        //, = \n \0 stop
+        if (is_lineStop(buffer[characterCounter])) //|| strlen(token) >= MAX_TOKEN_LEN
         {
-            i++;
-            continue;
-        }
-
-        init_j(); // Initialize j
-
-        int negSign = ((previousTokenType == TOKEN_COMMAND || previousTokenType == TOKEN_OPERATOR) && buffer[i] == '-' && isdigit(buffer[i + 1]));
-
-        // Identifiers (simple version)
-        if (isalpha(buffer[i]))
-        {
-            while (isalnum(buffer[i]))
-            {
-                token[get_jpp()] = buffer[i++];
-            }
-            token[get_j()] = '\0';
-            tokenCounter++;
-
+            // Check Token if it's a command
             if (is_command(token))
             {
-                previousTokenType = TOKEN_COMMAND;
-                // printf("Command %i: %s\n", tokenCounter, token);
-                if (line->command == NULL)
-                {
-                    line->command = strdup(token);
-                }
-                else if (line->extension.command1 == NULL)
-                {
-                    line->extension.command1 = strdup(token);
-                }
-                else
-                {
-                    line->extension.command2 = strdup(token);
-                }
+                addCommandToLine(line, token);
             }
             else
             {
-                if (is_operator(token))
-                {
-                    previousTokenType = TOKEN_OPERATOR;
-                    //printf("Operator %i: %s\n", tokenCounter, token);
-                    line->opr = strdup(token);
-                }
-                else
-                {
-                    previousTokenType = TOKEN_VARIABLE;
-                    //printf("Variable %i: %s\n", tokenCounter, token);
-                    if (tokenCounter == 1) 
-                    {
-                        line->returnValue = strdup(token);
-                    } 
-                    else if (line->param1 == NULL)
-                    {
-                        line->param1 = strdup(token);
-                        line->param1Type = TOKEN_VARIABLE;
-                    }
-                    else if (line->param2 == NULL)
-                    {
-                        line->param2 = strdup(token);
-                        line->param2Type = TOKEN_VARIABLE;
-                    }
-                    else if (line->extension.param1 == NULL)
-                    {
-                        line->extension.param1 = strdup(token);
-                        line->extension.param1Type = TOKEN_VARIABLE;
-                    }
-                    else
-                    {
-                        line->extension.param2 = strdup(token);
-                        line->extension.param2Type = TOKEN_VARIABLE;
-                    }
-                }
+                // it's an expression, save as a param in paramArray
+                addParamToLine(line, token, paramCounter++);
             }
-        }
-        // Numbers
-        else if (isdigit(buffer[i]) || negSign)
-        {
-            if (negSign)
-            {
-                token[get_jpp()] = buffer[i++];
-            }
-            while (isdigit(buffer[i]))
-            {
-                token[get_jpp()] = buffer[i++];
-            }
-            token[get_j()] = '\0';
 
-            if (tokenCounter == 0)
-            {
-                previousTokenType = TOKEN_LINE_NUMBER;
-                //printf("Line Number: %s\n", token);
-                line->lineNumber = atoi(token);
-            }
-            else
-            {
-                tokenCounter++;
-                previousTokenType = TOKEN_VALUE;
-                //printf("Value %i: %s\n", tokenCounter, token);
-                if (line->param1 == NULL)
-                {
-                    line->param1 = strdup(token);
-                    line->param1Type = TOKEN_VALUE;
-                }
-                else if (line->param2 == NULL)
-                {
-                    line->param2 = strdup(token);
-                    line->param2Type = TOKEN_VALUE;
-                }
-                else if (line->extension.param1 == NULL)
-                {
-                    line->extension.param1 = strdup(token);
-                    line->extension.param1Type = TOKEN_VALUE;
-                }
-                else
-                {
-                    line->extension.param2 = strdup(token);
-                    line->extension.param2Type = TOKEN_VALUE;
-                }
-            }
+            tokenCharacterCounter = 0;
+            solidTokenCharacterCounter = 0;
+            token[0] = '\0';
+            solidToken[0] = '\0';
         }
-        // Operators (simple single-character)
-        else if (strchr("+-*/=,><^", buffer[i]))
+        else if (isspace(buffer[characterCounter]))
         {
-            while (ispunct(buffer[i]))
+            // space -> Check stop/continue
+            if (is_command(token) && tokenCharacterCounter != 0)
             {
-                char* stop = strchr("=,^+", buffer[i]);
-                token[get_jpp()] = buffer[i++];
-                if (stop)
-                {
-                    break;
-                }
+                addCommandToLine(line, token);
+                tokenCharacterCounter = 0;
+                token[0] = '\0';
             }
-            token[get_j()] = '\0';
-            tokenCounter++;
-            previousTokenType = TOKEN_OPERATOR;
-            //printf("Operator %i: %s\n", tokenCounter, token);
-            line->opr = strdup(token);
+            else if (is_command(solidToken) && solidTokenCharacterCounter != 0)
+            {
+                addCommandToLine(line, solidToken);
+                token[tokenCharacterCounter - solidTokenCharacterCounter] = '\0'; 
+                addParamToLine(line, token, paramCounter++);
+                tokenCharacterCounter = 0;
+                token[0] = '\0';
+            }
+
+            solidTokenCharacterCounter = 0;
+            solidToken[0] = '\0';
         }
-        // Unknown character
         else
         {
-            printf("TOKEN_UNKNOWN %i: %c\n", tokenCounter, buffer[i]);
-            i++;
-            tokenCounter++;
+            token[tokenCharacterCounter] = buffer[characterCounter];
+            token[tokenCharacterCounter + 1] = '\0';
+            solidToken[solidTokenCharacterCounter] = buffer[characterCounter];
+            solidToken[solidTokenCharacterCounter + 1] = '\0';
+
+            tokenCharacterCounter++;
+            solidTokenCharacterCounter++;
         }
-    }
+        characterCounter++;
+    } while (buffer[characterCounter] != '\0');
 }
 
 void tokenize()
@@ -190,7 +116,6 @@ void tokenize()
     char buffer[MAX_LINE_LEN];
     for (tokenizerLineCounter = 0; tokenizerLineCounter < programLineCount; tokenizerLineCounter++)
     {
-        strcpy(buffer, fileLines[tokenizerLineCounter]);
-        tokenizeLine(buffer, &program[tokenizerLineCounter]);
+        tokenizeLine(fileLines[tokenizerLineCounter], &program[tokenizerLineCounter]);
     }
 }

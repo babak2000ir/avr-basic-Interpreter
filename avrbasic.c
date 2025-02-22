@@ -9,11 +9,11 @@ int variableCount = 0;
 int programLineCount = 0;
 
 // Lists of reserved words
-const char *commands[32] = {"END", "CLEAR", "NEXT", "WEND", "DO", "GOTO", "WHILE", "UNTIL", "PRINT", "INPUT",
+const char *commands[] = {"END", "CLEAR", "NEXT", "WEND", "DO", "GOTO", "WHILE", "UNTIL", "PRINT", "INPUT",
                             "LET", "POKE", "FOR", "IF", "PEEK", "ABS", "SGN", "INT", "SQR", "EXP", "LOG", "LOG10",
                             "SIN", "COS", "DEG", "RAD", "NOT", "SHL", "SHR", "TO", "THEN", "ELSE"};
 
-const char *operators[16] = {"=", "<>", "<", ">", "<=", ">=", "+", "-", "*", "/", "AND", "OR", "XOR", "MOD", ",", "^"};
+const char *operators[] = {"=", "<>", "<", ">", "<=", ">=", "+", "-", "*", "/", "AND", "OR", "XOR", "MOD", ",", "^"};
 
 // Functions to check if the token is a reserved word
 void toUppercase(char str[])
@@ -35,6 +35,15 @@ int is_command(char *token)
         }
     }
     return 0; // No match found
+}
+
+int is_lineStop(char lastChar)
+{
+    if (lastChar == ',' || lastChar == '=' || lastChar == '\n' || lastChar == '\0')
+    {
+        return 1;
+    }
+    return 0;
 }
 
 int is_operator(char *token)
